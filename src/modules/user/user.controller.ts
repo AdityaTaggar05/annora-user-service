@@ -1,4 +1,3 @@
-import { id } from './../../../node_modules/effect/src/Fiber';
 import { Request, Response } from "express";
 import { UserService } from "./user.service";
 import { CreateUserDTO, UpdateUserDTO } from "./user.dtos";
@@ -6,7 +5,10 @@ import { CreateUserDTO, UpdateUserDTO } from "./user.dtos";
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
-    async createUser(req: Request, resp: Response) {
+    createUser = async (req: Request, resp: Response) => {
+
+        console.log("Controller recieved body:",req.body)
+
         try {
             const dto: CreateUserDTO = req.body;
             const user = await this.userService.createUser(dto)

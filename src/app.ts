@@ -5,7 +5,9 @@ export const createApp = ()=> {
     const app = express();
 
     app.use(express.json());
-    app.use("/api",routes)
+    app.use(express.urlencoded({ extended: true }));
+
+    app.use("/",routes)
 
     return app;
 }
