@@ -2,6 +2,7 @@ import { UserService } from "./user.service";
 import { UserRepository } from "./user.repository";
 import { User } from "./user.types";
 import { CreateUserDTO, PrivateUserDTO, PublicUserDTO, UpdateUserDTO } from "./user.dtos";
+import { ConflitError, NotFoundError } from "../../errors/http-errors";
 
 export class UserServiceImpl implements UserService {
     private toPublicDTO(user: User): PublicUserDTO {
@@ -33,7 +34,7 @@ export class UserServiceImpl implements UserService {
         const existing = await this.userRepo.findByUsername(dto.username)
 
         if (existing)
-            throw new Error("Username already exists")
+            throw new ConflitError("Username already exists")
 
         const now = new Date()
 
@@ -54,10 +55,10 @@ export class UserServiceImpl implements UserService {
         return this.toPrivateDTO(created)
     }
 
-    async getUserById(id: string): Promise<PublicUserDTO | null> {
+    async getUserById(id: string): Promise<PublicUserDTO> {
         const user = await this.userRepo.findById(id)
         if (!user || !user.isActive)
-            return null
+            throw new NotFoundError("User not found")
 
         return this.toPublicDTO(user)
     }
@@ -65,7 +66,7 @@ export class UserServiceImpl implements UserService {
     async updateUser(id: string, dto: UpdateUserDTO): Promise<PrivateUserDTO> {
         const user = await this.userRepo.findById(id)
         if (!user || !user.isActive)
-            throw new Error("User not found")
+            throw new NotFoundError("User not found")
 
         const updated = await this.userRepo.update(id,{...dto})
 
@@ -75,7 +76,7 @@ export class UserServiceImpl implements UserService {
     async deactivateUser(id: string): Promise<void> {
         const user = await this.userRepo.findById(id)
         if (!user)
-            throw new Error("User not found")
+            throw new NotFoundError("User not found")
 
         await this.userRepo.deactivate(id)
     }

@@ -6,53 +6,35 @@ export class UserController {
     constructor(private readonly userService: UserService) {}
 
     createUser = async (req: Request, resp: Response) => {
-
-        console.log("Controller recieved body:",req.body)
-
-        try {
-            const dto: CreateUserDTO = req.body;
-            const user = await this.userService.createUser(dto)
-
-            return resp.status(201).json(user)
-        } catch (err: any){
-            return resp.status(400).json({message: err.message})
-        }
+        const user = await this.userService.createUser(req.body)
+        resp.status(201).json(user)
     }
 
     async getUserById(req: Request, resp: Response) {
-        try {
-            if (!req.params.id)
-                throw new Error("UserId isn't specified")
-            const user = await this.userService.getUserById(req.params.id)
-            if(!user)
-                return resp.status(404).json({message: "User not found"})
-
-            return resp.status(200).json(user)
-        }catch (err :any) {
-            resp.status(500).json({message: "Internal Server Error"})
+        if (!req.params.id){
+            resp.status(400).json({message: "UserId not found in the params"})
+            throw new Error("UserId not found")
         }
+        const user = await this.userService.getUserById(req.params.id)
+        resp.status(200).json(user)
     }
 
     async updateUser(req: Request, resp: Response) {
-        try {
-            const dto: UpdateUserDTO = req.body
-            if (!req.params.id)
-                throw new Error("Missing UserId")
-            const updated = await this.userService.updateUser(req.params.id,dto)
-            return resp.status(204).json(updated)
-        }catch (err: any) {
-            return resp.status(400).json({message: err.message})
+        if (!req.params.id){
+            resp.status(400).json({message: "UserId not mentioned in the params"})
+            throw new Error("UserId not mentioned")
         }
+
+        const user = await this.userService.updateUser(req.params.id,req.body)
+        resp.status(200).json(user)
     }
 
     async deactivateUser(req: Request, resp: Response) {
-        try {
-            if (!req.params.id)
-                throw new Error("UserId not found")
-            await this.userService.deactivateUser(req.params.id)
-            return resp.status(204).send()
-        }catch (err: any) {
-            return resp.status(404).json({message: err.message})
+        if (!req.params.id){
+            resp.status(400).json({message: "UserId not mentioned in the params"})
+            throw new Error("UserId not mentioned")
         }
+        await this.userService.deactivateUser(req.params.id)
+        return resp.status(204).send()
     }
 }
