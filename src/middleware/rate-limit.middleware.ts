@@ -8,7 +8,7 @@ export const rateLimitCreateUser = async (
   res: Response,
   next: NextFunction
 ) => {
-  if (process.env.NODE_ENV === "test") {
+  if (process.env.NODE_ENV !== "infra") {
     return next();
   }
 
