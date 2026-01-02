@@ -25,9 +25,9 @@ This service **does not**:
 - Issue JWTs
 - Perform login / signup auth flows
 
-It **does**:
+This service **does**:
 - Verify JWTs
-- Extract `userId` from token
+- Extract `userId` from token (`sub` claim)
 - Manage user profile data
 
 ---
@@ -77,7 +77,7 @@ DATABASE_URL=postgresql://user:password@localhost:5432/annora_user
 # Redis (rate limiting)
 REDIS_URL=redis://localhost:6379
 
-# Auth Service JWKS
+# Auth Service JWKS endpoint
 AUTH_JWKS_URL=https://auth-service/.well-known/jwks.json
 ```
 
@@ -110,6 +110,8 @@ npm run dev
 
 ## 🌐 API Endpoints
 
+---
+
 ### Create User
 
 **POST** `/users`
@@ -128,7 +130,7 @@ Authorization: Bearer <JWT>
 }
 ```
 
-**Response – 201**
+**Response – 201 (Created)**
 ```json
 {
   "id": "user-123",
@@ -138,11 +140,14 @@ Authorization: Bearer <JWT>
 }
 ```
 
-**Errors**
-- `400` – Invalid payload
-- `401` – Unauthenticated
-- `409` – Username already exists
-- `429` – Rate limit exceeded
+**Error Responses**
+| Status | Response |
+|------|---------|
+| 400 | `{ "message": "Invalid request payload" }` |
+| 401 | `{ "message": "Unauthenticated" }` |
+| 409 | `{ "message": "Username already exists" }` |
+| 429 | `{ "message": "Too many requests" }` |
+| 500 | `{ "message": "Internal server error" }` |
 
 ---
 
@@ -150,8 +155,9 @@ Authorization: Bearer <JWT>
 
 **GET** `/users/:id`
 
-- Returns **private profile** if requester is the same user
-- Returns **public profile** otherwise
+Behavior depends on **who is requesting**.
+
+#### Public User View (requester ≠ target user)
 
 **Response – 200**
 ```json
@@ -159,15 +165,45 @@ Authorization: Bearer <JWT>
   "id": "user-123",
   "username": "parth",
   "name": "Parth",
-  "age": 22
+  "age": 22,
+  "avatarUrl": "https://cdn.app/avatar.png",
+  "bio": "Backend engineer"
 }
 ```
+
+Fields like `createdAt`, `updatedAt`, and internal flags are **not exposed**.
+
+#### Private User View (requester === target user)
+
+**Response – 200**
+```json
+{
+  "id": "user-123",
+  "username": "parth",
+  "name": "Parth",
+  "age": 22,
+  "avatarUrl": "https://cdn.app/avatar.png",
+  "bio": "Backend engineer",
+  "isActive": true,
+  "createdAt": "2026-01-02T10:15:00Z",
+  "updatedAt": "2026-01-05T18:30:00Z"
+}
+```
+
+**Error Responses**
+| Status | Response |
+|------|---------|
+| 401 | `{ "message": "Unauthenticated" }` |
+| 404 | `{ "message": "User not found" }` |
+| 500 | `{ "message": "Internal server error" }` |
 
 ---
 
 ### Update User
 
 **PUT** `/users/:id`
+
+Only the **owner of the profile** may update it.
 
 **Headers**
 ```
@@ -193,11 +229,22 @@ Authorization: Bearer <JWT>
 }
 ```
 
+**Error Responses**
+| Status | Response |
+|------|---------|
+| 400 | `{ "message": "Invalid request payload" }` |
+| 401 | `{ "message": "Unauthenticated" }` |
+| 403 | `{ "message": "Forbidden" }` |
+| 404 | `{ "message": "User not found" }` |
+| 500 | `{ "message": "Internal server error" }` |
+
 ---
 
 ### Deactivate User
 
 **DELETE** `/users/:id`
+
+Soft-deletes (deactivates) a user. Only the owner may perform this action.
 
 **Headers**
 ```
@@ -209,11 +256,21 @@ Authorization: Bearer <JWT>
 No Content
 ```
 
+**Error Responses**
+| Status | Response |
+|------|---------|
+| 401 | `{ "message": "Unauthenticated" }` |
+| 403 | `{ "message": "Forbidden" }` |
+| 404 | `{ "message": "User not found" }` |
+| 500 | `{ "message": "Internal server error" }` |
+
 ---
 
 ### Health Check
 
 **GET** `/health`
+
+Used for liveness checks.
 
 ```json
 {
@@ -229,14 +286,16 @@ No Content
 
 **GET** `/ready`
 
+Used for dependency readiness checks.
+
+**Healthy**
 ```json
 {
   "status": "ready"
 }
 ```
 
-or
-
+**Unhealthy**
 ```json
 {
   "status": "not_ready",
@@ -251,7 +310,7 @@ or
 - JWT verification only (no token issuance)
 - Strict request validation
 - Redis-backed rate limiting
-- No sensitive data leaked in errors
+- No sensitive data leaked in errors or logs
 
 ---
 
