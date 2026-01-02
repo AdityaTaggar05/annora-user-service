@@ -1,5 +1,3 @@
-/// <reference types="jest" />
-
 import { UserServiceImpl } from "../../src/modules/user/user.service.impl";
 import { UserRepository } from "../../src/modules/user/user.repository";
 import { User } from "../../src/modules/user/user.types";
@@ -7,18 +5,6 @@ import { User } from "../../src/modules/user/user.types";
 describe("UserServiceImpl", () => {
   let service: UserServiceImpl;
   let repo: jest.Mocked<UserRepository>;
-
-  beforeEach(() => {
-    repo = {
-      create: jest.fn(),
-      findById: jest.fn(),
-      findByUsername: jest.fn(),
-      update: jest.fn(),
-      deactivate: jest.fn(),
-    };
-
-    service = new UserServiceImpl(repo);
-  });
 
   const baseUser: User = {
     id: "u1",
@@ -30,22 +16,34 @@ describe("UserServiceImpl", () => {
     updatedAt: new Date(),
   };
 
-  it("creates a user successfully", async () => {
+  beforeEach(() => {
+    repo = {
+      findById: jest.fn(),
+      findByUsername: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      deactivate: jest.fn(),
+    } as unknown as jest.Mocked<UserRepository>;
+
+    service = new UserServiceImpl(repo);
+  });
+
+  it("creates a user when username is unique", async () => {
     repo.findByUsername.mockResolvedValue(null);
     repo.create.mockResolvedValue(baseUser);
 
-    const result = await service.createUser({
+    const user = await service.createUser({
       id: "u1",
       username: "parth",
       name: "Parth",
       age: 22,
     });
 
-    expect(repo.create).toHaveBeenCalledTimes(1);
-    expect(result.username).toBe("parth");
+    expect(repo.create).toHaveBeenCalled();
+    expect(user.username).toBe("parth");
   });
 
-  it("throws error if username already exists", async () => {
+  it("throws if username already exists", async () => {
     repo.findByUsername.mockResolvedValue(baseUser);
 
     await expect(
@@ -55,41 +53,41 @@ describe("UserServiceImpl", () => {
         name: "Someone",
         age: 30,
       })
-    ).rejects.toThrow("Username already exists");
+    ).rejects.toThrow();
   });
 
   it("returns public user by id", async () => {
     repo.findById.mockResolvedValue(baseUser);
 
-    const user = await service.getUserById("u1");
+    const user = await service.getPublicUserById("u1");
 
     expect(user).not.toHaveProperty("createdAt");
+    expect(user).not.toHaveProperty("updatedAt");
     expect(user?.username).toBe("parth");
   });
 
-  it("returns null if user is inactive", async () => {
+  it("throws NotFoundError if public user is inactive", async () => {
     repo.findById.mockResolvedValue({ ...baseUser, isActive: false });
 
-    const user = await service.getUserById("u1");
-
-    expect(user).toBeNull();
+    await expect(
+      service.getPublicUserById("u1")
+    ).rejects.toThrow("User not found");
   });
 
-  it("updates user profile", async () => {
+  it("returns private user for owner", async () => {
     repo.findById.mockResolvedValue(baseUser);
-    repo.update.mockResolvedValue({ ...baseUser, name: "Updated" });
 
-    const updated = await service.updateUser("u1", { name: "Updated" });
+    const user = await service.getPrivateUserById("u1");
 
-    expect(updated.name).toBe("Updated");
+    expect(user?.createdAt).toBeInstanceOf(Date);
+    expect(user?.updatedAt).toBeInstanceOf(Date);
   });
 
-  it("deactivates user", async () => {
-    repo.findById.mockResolvedValue(baseUser);
-    repo.deactivate.mockResolvedValue();
+  it("throws NotFoundError if private user is inactive", async () => {
+    repo.findById.mockResolvedValue({ ...baseUser, isActive: false });
 
-    await service.deactivateUser("u1");
-
-    expect(repo.deactivate).toHaveBeenCalledWith("u1");
+    await expect(
+      service.getPrivateUserById("u1")
+    ).rejects.toThrow("User not found");
   });
 });

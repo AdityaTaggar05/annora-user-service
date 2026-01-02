@@ -38,7 +38,7 @@ export function authMiddleware(
         if (!payload.sub)
             return resp.status(401).json({message: "Invalid token payload"})
 
-        req.id = payload.sub
+        req.userId = payload.sub
         next();
     })
 }

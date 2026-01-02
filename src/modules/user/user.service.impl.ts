@@ -29,8 +29,6 @@ export class UserServiceImpl implements UserService {
 
     async createUser(dto: CreateUserDTO): Promise<PrivateUserDTO> {
 
-        console.log("Service recieved DTO:",dto)
-
         const existing = await this.userRepo.findByUsername(dto.username)
 
         if (existing)

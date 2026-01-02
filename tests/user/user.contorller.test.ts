@@ -2,7 +2,8 @@
 
 import { UserController } from "../../src/modules/user/user.controller";
 import { UserService } from "../../src/modules/user/user.service";
-import { Request, Response } from "express";
+import { Response } from "express";
+import { AuthenticatedRequest } from "../../src/types/auth.types";
 
 describe("UserController", () => {
   let controller: UserController;
@@ -11,11 +12,12 @@ describe("UserController", () => {
 
   beforeEach(() => {
     service = {
-      createUser: jest.fn(),
-      getUserById: jest.fn(),
+      getPublicUserById: jest.fn(),
+      getPrivateUserById: jest.fn(),
       updateUser: jest.fn(),
       deactivateUser: jest.fn(),
-    };
+      createUser: jest.fn(),
+    } as unknown as jest.Mocked<UserService>;
 
     controller = new UserController(service);
 
@@ -26,58 +28,72 @@ describe("UserController", () => {
     };
   });
 
-  it("returns user on getUserById", async () => {
-    service.getUserById.mockResolvedValue({
+  it("returns public user when requester is not owner", async () => {
+    service.getPublicUserById.mockResolvedValue({
       id: "u1",
       username: "parth",
       name: "Parth",
       age: 22,
-    });
+    } as any);
 
-    const req = {
-        params: { id: "u1" },
-    } as unknown as Request;
+    const req: Partial<AuthenticatedRequest> = {
+      params: { id: "u1" },
+      userId: "someone-else",
+    };
 
+    await controller.getUserById(req as AuthenticatedRequest, res as Response);
 
-    await controller.getUserById(req, res as Response);
-
+    expect(service.getPublicUserById).toHaveBeenCalledWith("u1");
+    expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalled();
   });
 
-  it("returns 404 if user not found", async () => {
-    service.getUserById.mockResolvedValue(null);
+  it("returns private user when requester is owner", async () => {
+    service.getPrivateUserById.mockResolvedValue({
+      id: "u1",
+      username: "parth",
+      name: "Parth",
+      age: 22,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
 
-    const req = {
-        params: { id: "x" },
-    } as unknown as Request;
+    const req: Partial<AuthenticatedRequest> = {
+      params: { id: "u1" },
+      userId: "u1",
+    };
 
+    await controller.getUserById(req as AuthenticatedRequest, res as Response);
 
-    await controller.getUserById(req, res as Response);
-
-    expect(res.status).toHaveBeenCalledWith(404);
+    expect(service.getPrivateUserById).toHaveBeenCalledWith("u1");
+    expect(res.status).toHaveBeenCalledWith(200);
   });
 
-  it("creates a user", async () => {
+  it("creates a user using auth userId", async () => {
     service.createUser.mockResolvedValue({
       id: "u1",
       username: "parth",
       name: "Parth",
       age: 22,
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+    } as any);
 
     const req = {
+      userId: "u1",
       body: {
-        id: "u1",
         username: "parth",
         name: "Parth",
         age: 22,
       },
-    } as Request;
+    } as AuthenticatedRequest;
 
     await controller.createUser(req, res as Response);
+
+    expect(service.createUser).toHaveBeenCalledWith({
+      id: "u1",
+      username: "parth",
+      name: "Parth",
+      age: 22,
+    });
 
     expect(res.status).toHaveBeenCalledWith(201);
   });

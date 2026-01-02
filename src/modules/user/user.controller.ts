@@ -8,7 +8,7 @@ export class UserController {
 
     createUser = async (req: AuthenticatedRequest, resp: Response) => {
         const dto: CreateUserDTO = {
-            id: req.id!,
+            id: req.userId!,
             ...req.body
         }
         const user = await this.userService.createUser(dto)
@@ -17,7 +17,7 @@ export class UserController {
 
     getUserById = async (req: AuthenticatedRequest, resp: Response)=> {
       const targetUser = req.params.id
-      const authUser = req.id
+      const authUser = req.userId
       if (!targetUser){
         resp.status(400).json({message: "UserId missing in params"})
         return
@@ -40,7 +40,7 @@ export class UserController {
             return
         }
 
-        if (req.id !== targetUser){
+        if (req.userId !== targetUser){
             resp.status(403).json({message: "Forbidden"})
             return
         }
@@ -56,7 +56,7 @@ export class UserController {
             return
         }
 
-        if (req.id !== targetUser) {
+        if (req.userId !== targetUser) {
             resp.status(403).json({message: "Forbidden"})
             return
         }
