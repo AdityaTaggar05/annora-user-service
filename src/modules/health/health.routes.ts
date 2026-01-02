@@ -8,4 +8,4 @@ const healthController = new HealthController()
 const readinessController = new ReadinessController()
 
 healthRouter.get("/health",healthController.health)
-healthRouter.get("ready",readinessController.ready)
+healthRouter.get("/ready",readinessController.ready)
