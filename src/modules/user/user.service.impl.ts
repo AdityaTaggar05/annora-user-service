@@ -55,12 +55,19 @@ export class UserServiceImpl implements UserService {
         return this.toPrivateDTO(created)
     }
 
-    async getUserById(id: string): Promise<PublicUserDTO> {
+    async getPublicUserById(id: string): Promise<PublicUserDTO> {
+        const user = await this.userRepo.findById(id)
+        if(!user || !user.isActive)
+            throw new NotFoundError("User not found")
+        return this.toPublicDTO(user)
+    }
+
+    async getPrivateUserById(id: string): Promise<PrivateUserDTO> {
         const user = await this.userRepo.findById(id)
         if (!user || !user.isActive)
             throw new NotFoundError("User not found")
-
-        return this.toPublicDTO(user)
+        
+        return this.toPrivateDTO(user)
     }
 
     async updateUser(id: string, dto: UpdateUserDTO): Promise<PrivateUserDTO> {

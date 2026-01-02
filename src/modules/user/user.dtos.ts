@@ -1,5 +1,5 @@
 export interface CreateUserDTO {
-    id: string,
+    id: string, //injected, not client-provided
     username: string,
     name: string,
     age: number,

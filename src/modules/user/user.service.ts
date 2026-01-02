@@ -3,7 +3,8 @@ import { User } from "./user.types";
 
 export interface UserService {
     createUser(dto: CreateUserDTO): Promise<PrivateUserDTO>;
-    getUserById(id: string): Promise<PublicUserDTO | null>
+    getPrivateUserById(id:string): Promise<PrivateUserDTO>
+    getPublicUserById(id: string): Promise<PublicUserDTO>
     updateUser(id: string, dto: UpdateUserDTO): Promise<PrivateUserDTO>;
     deactivateUser(id: string): Promise<void>
 }
