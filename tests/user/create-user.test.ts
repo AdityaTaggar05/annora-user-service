@@ -3,6 +3,20 @@ import { createApp } from "../../src/app";
 import { generateTestJwt } from "../utils/jwt";
 import { startJwksServer } from "../utils/jwks-server";
 
+// 🔥 MOCK THE REAL MODULE
+jest.mock("../../src/modules/user/user.module", () => {
+  return {
+    userService: {
+      createUser: jest.fn().mockResolvedValue({
+        id: "user-123",
+        username: "mocked_user",
+        name: "Parth",
+        age: 22,
+      }),
+    },
+  };
+});
+
 let jwksServer: any;
 let app: ReturnType<typeof createApp>;
 
@@ -23,7 +37,7 @@ describe("POST /users", () => {
       .post("/users")
       .set("Authorization", `Bearer ${token}`)
       .send({
-        username: "parth",
+        username: "any_user",
         name: "Parth",
         age: 22,
       });

@@ -36,12 +36,8 @@ export class DrizzleUserRepository implements UserRepository {
     }
 
     async findByUsername(username: string): Promise<User | null> {
-
-        console.log("Repo querying username:", username);
-
         try {
-            const result = await db.select().from(users).where(eq(users.username,username))
-            console.log("Repo result:", result[0]);        
+            const result = await db.select().from(users).where(eq(users.username,username))        
 
             return result[0] ? this.toDomainUser(result[0]) : null
         }catch (err: any) {
