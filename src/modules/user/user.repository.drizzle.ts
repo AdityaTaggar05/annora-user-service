@@ -17,6 +17,7 @@ export class DrizzleUserRepository implements UserRepository {
             age: row.age,
             ...(row.avatarUrl !== undefined && { avatarUrl: row.avatarUrl }),
             ...(row.bio !== undefined && {bio: row.bio}),
+            gender: row.gender,
             isActive: row.isActive,
             createdAt: row.createdAt,
             updatedAt: row.updatedAt

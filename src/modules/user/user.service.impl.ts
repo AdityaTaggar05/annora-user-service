@@ -13,6 +13,7 @@ export class UserServiceImpl implements UserService {
             age: user.age,
             ...(user.avatarUrl !== undefined && { avatarUrl: user.avatarUrl }),
             ...(user.bio !== undefined && { bio: user.bio }),
+            gender: user.gender
         }
     }
 
@@ -43,6 +44,7 @@ export class UserServiceImpl implements UserService {
             age: dto.age,
             ...(dto.avatarUrl !== undefined && { avatarUrl: dto.avatarUrl }),
             ...(dto.bio !== undefined && { bio: dto.bio }),
+            gender: dto.gender,
             isActive: true,
             createdAt: now,
             updatedAt: now
