@@ -24,7 +24,7 @@ services:
 
   postgres:
     image: postgres:16
-    container_name: annora-postgres
+    container_name: user-postgres
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -40,7 +40,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: annora-redis
+    container_name: redis-cache
     volumes:
       - redis_data:/data
     healthcheck:
