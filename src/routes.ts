@@ -4,7 +4,7 @@ import { healthRouter } from "./modules/health/health.routes";
 
 const router = Router();
 
-router.get("/hello",(_req,resp)=>{
+router.get("/",(_req,resp)=>{
     resp.status(200).json({message:"Hello from the server"})
 })
 router.use("/users",createUserRouter())
