@@ -10,7 +10,7 @@ services:
       JWT_ISSUER: ${JWT_ISSUER}
       AUTH_JWKS_URL: ${AUTH_JWKS_URL}
       JWKS_URI: ${JWKS_URI}
-      NODE_ENV: development
+      NODE_ENV: production
       PORT: 3000
     volumes:
       - .:/app
@@ -21,7 +21,7 @@ services:
       redis:
         condition: service_healthy
     restart: unless-stopped
-    command: npm run dev
+    command: npm run build
 
   postgres:
     image: postgres:16
