@@ -2,11 +2,12 @@
   "name": "new-user-service",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/index.js",
+  "main": "build/index.js",
   "scripts": {
     "dev": "nodemon --watch src --exec ts-node src/index.ts",
-    "build": "tsc",
-    "start": "node dist/index.js",
+    "build": "npm run build:only && npm run start",
+    "build:only": "tsc",
+    "start": "node build/index.js",
     "test": "jest",
     "test:rate-limit": "jest -c jest.infra.config.ts",
     "test:e2e": "jest -c jest.e2e.config.ts"

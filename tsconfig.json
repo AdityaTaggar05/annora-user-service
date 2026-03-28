@@ -4,7 +4,7 @@
     "moduleResolution": "node16",
     "target": "es2020",
     "rootDir": "./src",
-    "outDir": "./dist",
+    "outDir": "./build",
 
     "types": [],
 
@@ -25,5 +25,5 @@
     "skipLibCheck": true
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["tests", "dist", "node_modules"]
+  "exclude": ["tests", "build", "node_modules"]
 }
