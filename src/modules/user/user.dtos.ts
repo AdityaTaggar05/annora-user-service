@@ -6,8 +6,8 @@ export interface CreateUserDTO {
     name: string,
     age: number,
     avatarUrl?: string,
-    bio?: string
-    gender: Gender
+    bio?: string,
+    gender?: Gender
 }
 
 export interface UpdateUserDTO {
@@ -15,7 +15,7 @@ export interface UpdateUserDTO {
     avatarUrl?: string,
     bio?: string,
     age?: number,
-    gender: Gender
+    gender?: Gender
 }
 
 export interface PublicUserDTO {
@@ -24,7 +24,7 @@ export interface PublicUserDTO {
     username: string,
     avatarUrl?: string,
     bio?: string,
-    gender: Gender,
+    gender?: Gender,
     age: number
 }
 

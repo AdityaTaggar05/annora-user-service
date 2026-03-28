@@ -12,7 +12,7 @@ export interface User {
     age: number,
     avatarUrl?: string,
     bio?: string,
-    gender: Gender
+    gender?: Gender,
     isActive: boolean,
     createdAt: Date,
     updatedAt: Date
