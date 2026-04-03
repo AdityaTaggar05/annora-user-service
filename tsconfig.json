@@ -5,19 +5,14 @@
     "target": "es2020",
     "rootDir": "./src",
     "outDir": "./build",
-
     "types": [],
-
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
-
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
-
     "strict": true,
     "jsx": "react-jsx",
-
     "verbatimModuleSyntax": false,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
@@ -25,5 +20,5 @@
     "skipLibCheck": true
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["tests", "build", "node_modules"]
+  "exclude": ["tests", "build", "node_modules", "**/undodir"]
 }
