@@ -1,2 +1,0 @@
-DROP TYPE IF EXISTS gender;
-DROP TABLE users;
