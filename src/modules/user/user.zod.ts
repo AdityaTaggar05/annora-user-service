@@ -28,3 +28,7 @@ export const updateUserZodSchema = z.object({
 export const userIdParamZodSchema = z.object({
     id: z.string().min(1)
 })
+
+export const usernameParamZodSchema = z.object({
+    username: z.string().min(3).max(32)
+})

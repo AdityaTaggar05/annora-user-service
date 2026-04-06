@@ -15,6 +15,38 @@ export class UserController {
         resp.status(201).json(user)
     }
 
+    getCurrentUser = async (req: AuthenticatedRequest, resp: Response) => {
+        const authUser = req.userId
+
+        if(!authUser){
+            resp.status(401).json({message: "Unauthorized"})
+            return
+        }
+
+        const user = await this.userService.getPrivateUserById(authUser)
+        resp.status(200).json(user)
+    }
+
+    getUserByUsername = async (req: AuthenticatedRequest, resp: Response) => {
+        const targetUsername = req.params.username
+        const authUser = req.userId
+
+        if (!targetUsername) {
+            resp.status(400).json({message:"Username missing in params"})
+            return
+        }
+
+        const publicuser = await this.userService.getPublicUserByUsername(targetUsername)
+
+        const isOwner = authUser == publicuser.id
+
+        const user = isOwner
+            ? await this.userService.getPrivateUserByUsername(targetUsername)
+            : publicuser
+        
+        resp.status(200).json(user)
+    }
+
     getUserById = async (req: AuthenticatedRequest, resp: Response)=> {
       const targetUser = req.params.id
       const authUser = req.userId
