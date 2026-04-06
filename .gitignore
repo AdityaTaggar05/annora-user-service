@@ -1,3 +1,9 @@
+# Docker
+docker-compose.override.yaml
+
+# IDE
+undodir
+
 # Logs
 logs
 *.log
