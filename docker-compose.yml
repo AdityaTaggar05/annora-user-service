@@ -1,3 +1,4 @@
+name: annora-user
 services:
   server:
     build: .
@@ -12,16 +13,27 @@ services:
       JWKS_URI: ${JWKS_URI}
       NODE_ENV: production
       PORT: 3000
-    volumes:
-      - .:/app
-      - /app/node_modules
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     restart: unless-stopped
-    command: npm run build
+    command: npm run start
+
+  migrate:
+    container_name: user-migrate
+    image: migrate/migrate:v4.19.0
+    volumes:
+      - ./drizzle:/migrations
+    entrypoint: ["migrate"]
+    command: ["-source=file:///migrations", "-database=${DATABASE_URL}", "up"]
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   postgres:
     image: postgres:16
@@ -33,7 +45,15 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "/usr/bin/pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
+      test:
+        [
+          "CMD",
+          "/usr/bin/pg_isready",
+          "-U",
+          "${POSTGRES_USER}",
+          "-d",
+          "${POSTGRES_DB}",
+        ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -41,7 +61,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: redis-cache
+    container_name: user-redis
     volumes:
       - redis_data:/data
     healthcheck:
